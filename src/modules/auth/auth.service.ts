@@ -68,7 +68,7 @@ export class AuthService {
       expiresIn: '7d',
     });
 
-    // ✅ Ambos os tokens em httpOnly cookies
+    // Ambos os tokens em httpOnly cookies
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -161,7 +161,7 @@ export class AuthService {
       expiresIn: '7d',
     });
 
-    // ✅ Seta ambos os tokens em cookies
+    // Seta ambos os tokens em cookies
     res.cookie('accessToken', newAccessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
