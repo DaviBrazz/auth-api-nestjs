@@ -1,0 +1,226 @@
+### Variáveis
+@baseUrl = http://localhost:3000
+
+### ==================== AUTH ====================
+
+### Registrar novo usuário
+POST {{baseUrl}}/auth/signup
+Content-Type: application/json
+
+{
+  "name": "João Silva",
+  "email": "joao@example.com",
+  "password": "senha123"
+}
+
+
+### Login 
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "joao@example.com",
+  "password": "senha123"
+}
+
+### Login como ADMIN
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "admin123"
+}
+
+### Refresh Token (usa cookie refreshToken automaticamente)
+POST {{baseUrl}}/auth/refresh
+
+### Logout (limpa cookies)
+POST {{baseUrl}}/auth/logout
+
+### ==================== USERS ====================
+
+### Listar todos os usuários (somente ADMIN)
+GET {{baseUrl}}/users
+
+### Buscar usuário por ID (ADMIN ou próprio usuário)
+GET {{baseUrl}}/users/1
+
+### Buscar outro usuário (deve falhar se não for ADMIN)
+GET {{baseUrl}}/users/3
+
+### Atualizar próprio usuário
+PATCH {{baseUrl}}/users/1
+Content-Type: application/json
+
+{
+  "name": "João Silva Atualizado"
+}
+
+### Atualizar outro usuário (deve falhar se não for ADMIN)
+PATCH {{baseUrl}}/users/2
+Content-Type: application/json
+
+{
+  "name": "Usuário Modificado"
+}
+
+### Deletar usuário (somente ADMIN)
+DELETE {{baseUrl}}/users/2
+
+### ==================== TESTES DE SEGURANÇA ====================
+
+### Tentar acessar rota protegida sem login
+GET {{baseUrl}}/users
+
+### Fazer logout e tentar usar token expirado
+# Primeiro faça logout
+POST {{baseUrl}}/auth/logout
+
+###
+# Depois tente acessar uma rota protegida
+GET {{baseUrl}}/users
+
+### Testar refresh após logout (deve falhar - token na blacklist)
+POST {{baseUrl}}/auth/refresh
+
+### ==================== FLUXO COMPLETO ====================
+
+### FLUXO 1: Registro → Login → Acesso → Logout
+# 1. Registrar
+POST {{baseUrl}}/auth/signup
+Content-Type: application/json
+
+{
+  "name": "Teste Completo",
+  "email": "teste@example.com",
+  "password": "teste123"
+}
+
+###
+# 2. Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "teste@example.com",
+  "password": "teste123"
+}
+
+###
+# 3. Acessar perfil
+GET {{baseUrl}}/users/1
+
+###
+# 4. Atualizar perfil
+PATCH {{baseUrl}}/users/1
+Content-Type: application/json
+
+{
+  "name": "Teste Completo Atualizado"
+}
+
+###
+# 5. Fazer logout
+POST {{baseUrl}}/auth/logout
+
+### FLUXO 2: Login → Esperar 15min → Refresh → Continuar
+# 1. Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "joao@example.com",
+  "password": "senha123"
+}
+
+###
+# 2. Após ~15 minutos, renovar token
+POST {{baseUrl}}/auth/refresh
+
+###
+# 3. Acessar rota com novo token
+GET {{baseUrl}}/users/1
+
+### ==================== TESTES DE VALIDAÇÃO ====================
+
+### 16. Login com credenciais inválidas
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "joao@example.com",
+  "password": "senhaerrada"
+}
+
+### 17. Registrar email duplicado
+POST {{baseUrl}}/auth/signup
+Content-Type: application/json
+
+{
+  "name": "Duplicado",
+  "email": "joao@example.com",
+  "password": "senha123"
+}
+
+### 18. Registrar com dados inválidos
+POST {{baseUrl}}/auth/signup
+Content-Type: application/json
+
+{
+  "name": "",
+  "email": "emailinvalido",
+  "password": "123"
+}
+
+### ==================== TESTES DE PERMISSÃO ====================
+
+### 19. USER tentando listar todos os usuários (deve falhar)
+# Primeiro faça login como USER
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "joao@example.com",
+  "password": "senha123"
+}
+
+###
+# Depois tente listar (somente ADMIN pode)
+GET {{baseUrl}}/users
+
+###
+### 20. USER tentando deletar (deve falhar)
+DELETE {{baseUrl}}/users/2
+
+###
+### 21. ADMIN acessando qualquer recurso
+# Login como ADMIN
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "admin123"
+}
+
+###
+# Listar todos
+GET {{baseUrl}}/users
+
+###
+# Ver qualquer usuário
+GET {{baseUrl}}/users/1
+
+###
+# Atualizar qualquer usuário
+PATCH {{baseUrl}}/users/1
+Content-Type: application/json
+
+{
+  "name": "Modificado pelo Admin"
+}
+
+###
+# Deletar qualquer usuário
+DELETE {{baseUrl}}/users/3
